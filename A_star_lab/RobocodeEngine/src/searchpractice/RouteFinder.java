@@ -41,7 +41,7 @@ public class RouteFinder {
 		int NumObstacles = (int) (NUMTILEROWS*NUMTILECOLS*OBSTACLEFRACTION);
 		
 		/** Create obstacles and place them at random so that no pair of obstacles are at the same position **/
-		RobotSpecification[] modelRobots = engine.getLocalRepository ("sample.SittingDuck,searchpractice.RouteBot*");
+		RobotSpecification[] modelRobots = engine.getLocalRepository ("sample.SittingDuck,robotastar.RouteRobot*");
 		RobotSpecification[] existingRobots = new RobotSpecification[NumObstacles+1];
 		RobotSetup[] robotSetups = new RobotSetup[NumObstacles+1];
 		
@@ -74,10 +74,10 @@ public class RouteFinder {
 			auxRow = rnd.nextInt(NUMTILEROWS);
 			auxCol = rnd.nextInt(NUMTILECOLS);
 			i = 0;
-			while (i <= NumObstacles && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
+			while (i < NumObstacles && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
 				i++;
 			}
-		} while (i <= NumObstacles);
+		} while (i < NumObstacles);
 		
 		double InitialAgentRow = auxRow;   
 		double InitialAgentCol = auxCol;   

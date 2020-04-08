@@ -1,0 +1,3 @@
+module myrobot {
+ requires robocode;
+}
