@@ -18,6 +18,28 @@ public class RouteFinder {
 	final static double OBSTACLEFRACTION = 0.3;
 	*/
 	
+	static int battleMatrix [][] = null;
+	
+	static int startX = 0;
+	static int startY = 0;
+	static int goalX = 0;
+	static int goalY = 0;
+	
+	static public int[][] getMatrix (){
+		return battleMatrix;
+	}
+	static public int getStartX (){
+		return startX;
+	}
+	static public int getStartY (){
+		return startY;
+	}
+	static public int getGoalX (){
+		return goalX;
+	}
+	static public int getGoalY (){
+		return goalY;
+	}
 	public static void main(String[] args) {
 		
 		// Create the RobocodeEngine
@@ -37,6 +59,7 @@ public class RouteFinder {
 		
 		BattlefieldSpecification battlefield = new BattlefieldSpecification(NumPixelRows, NumPixelCols); 
 													// 800x600 
+		battleMatrix = new int[NumTileRows][NumTileCols];
 		 
 		// Setup battle parameters
 		int numberOfRounds = 5;
@@ -58,13 +81,18 @@ public class RouteFinder {
         long seed = 0;
         rnd.setSeed(seed);
         
+        Random noSeedRnd = new Random();
+        
+        
 		double InitialObstacleRow, InitialObstacleCol;
-		int i, auxRow, auxCol;
+		int i, auxRow, auxCol, matrixRow, matrixCol;
 		
 		for(int NdxObstacle=0; NdxObstacle<NumObstacles; NdxObstacle++){   
 			do {
-				auxRow = rnd.nextInt(NumTileRows)*PixelPerTile + (PixelPerTile/2);
-				auxCol = rnd.nextInt(NumTileCols)*PixelPerTile + (PixelPerTile/2);
+				matrixRow = rnd.nextInt(NumTileRows);
+				matrixCol = rnd.nextInt(NumTileCols);
+				auxRow = matrixRow*PixelPerTile + (PixelPerTile/2);
+				auxCol = matrixCol*PixelPerTile + (PixelPerTile/2);
 				i = 0;
 				while (i < NdxObstacle && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
 					i++;
@@ -74,14 +102,17 @@ public class RouteFinder {
 			InitialObstacleRow = auxRow;
 			InitialObstacleCol = auxCol;
 			existingRobots[NdxObstacle] = modelRobots[0];
-			robotSetups[NdxObstacle]= new RobotSetup(InitialObstacleRow, InitialObstacleCol, 0.0);                 
+			battleMatrix[matrixRow][matrixCol] = 1;
+			robotSetups[NdxObstacle]= new RobotSetup(InitialObstacleRow, InitialObstacleCol, 0.0);
 		}
 		
 		/** Create the agent and place it in a random position without obstacle **/
 		existingRobots[NumObstacles] = modelRobots[1];
 		do {
-			auxRow = rnd.nextInt(NumTileRows)*PixelPerTile + (PixelPerTile/2);
-			auxCol = rnd.nextInt(NumTileCols)*PixelPerTile + (PixelPerTile/2);
+			matrixRow = noSeedRnd.nextInt(NumTileRows);
+			matrixCol = noSeedRnd.nextInt(NumTileCols);
+			auxRow = matrixRow*PixelPerTile + (PixelPerTile/2);
+			auxCol = matrixCol*PixelPerTile + (PixelPerTile/2);
 			i = 0;
 			while (i < NumObstacles && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
 				i++;
@@ -89,8 +120,26 @@ public class RouteFinder {
 		} while (i < NumObstacles);
 		
 		double InitialAgentRow = auxRow;   
-		double InitialAgentCol = auxCol;   
+		double InitialAgentCol = auxCol; 
+		battleMatrix[matrixRow][matrixCol] = 2;
+		startX = matrixRow;
+		startY = matrixCol;
 		robotSetups[NumObstacles] = new RobotSetup(InitialAgentRow, InitialAgentCol, 0.0); 
+		
+		do {
+			matrixRow = noSeedRnd.nextInt(NumTileRows);
+			matrixCol = noSeedRnd.nextInt(NumTileCols);
+			auxRow = matrixRow*PixelPerTile + (PixelPerTile/2);
+			auxCol = matrixCol*PixelPerTile + (PixelPerTile/2);
+			i = 0;
+			while (i < NumObstacles && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
+				i++;
+			}
+		} while (i < NumObstacles);
+		battleMatrix[matrixRow][matrixCol] = 3;
+		goalX = matrixRow;
+		goalY = matrixCol;
+		
 		 
 		/** Create and run the battle **/ 
 		BattleSpecification battleSpec = new BattleSpecification(battlefield, numberOfRounds,
