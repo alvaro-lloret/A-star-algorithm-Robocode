@@ -11,10 +11,12 @@ import robocode.control.events.*;
 
 public class RouteFinder {
 	
+	/*
 	final static int PIXELSPERTILE = 64;
 	final static int NUMTILEROWS = 19;
 	final static int NUMTILECOLS = 19;
 	final static double OBSTACLEFRACTION = 0.3;
+	*/
 	
 	public static void main(String[] args) {
 		
@@ -26,8 +28,13 @@ public class RouteFinder {
 		engine.setVisible(true); 
 		 
 		// Create the battlefield
-		int NumPixelRows = NUMTILEROWS*PIXELSPERTILE;
-		int NumPixelCols = NUMTILECOLS*PIXELSPERTILE;
+		int NumPixelRows = 832; // 768 o 832
+		int NumPixelCols = 640; // 576 o 640
+		int PixelPerTile = 64;
+		
+		int NumTileRows = NumPixelRows / PixelPerTile; // 12 o 13
+		int NumTileCols = NumPixelCols / PixelPerTile; // 9 o 10
+		
 		BattlefieldSpecification battlefield = new BattlefieldSpecification(NumPixelRows, NumPixelCols); 
 													// 800x600 
 		 
@@ -38,24 +45,26 @@ public class RouteFinder {
 		int sentryBorderSize = 50;
 		boolean hideEnemyNames = false;
 		
-		int NumObstacles = (int) (NUMTILEROWS*NUMTILECOLS*OBSTACLEFRACTION);
+		double ObstacleFraction = 0.3;
+		
+		int NumObstacles = (int) (NumTileRows*NumTileCols*ObstacleFraction);
 		
 		/** Create obstacles and place them at random so that no pair of obstacles are at the same position **/
-		RobotSpecification[] modelRobots = engine.getLocalRepository ("sample.SittingDuck,robotastar.RouteRobot*");
+		RobotSpecification[] modelRobots = engine.getLocalRepository ("sample.SittingDuck, robotastar.RouteRobot*");
 		RobotSpecification[] existingRobots = new RobotSpecification[NumObstacles+1];
 		RobotSetup[] robotSetups = new RobotSetup[NumObstacles+1];
 		
 		Random rnd = new Random();
-        	long seed = (PIXELSPERTILE*NUMTILEROWS*NUMTILECOLS);
-        	rnd.setSeed(seed);
+        long seed = 0;
+        rnd.setSeed(seed);
         
 		double InitialObstacleRow, InitialObstacleCol;
 		int i, auxRow, auxCol;
 		
 		for(int NdxObstacle=0; NdxObstacle<NumObstacles; NdxObstacle++){   
 			do {
-				auxRow = rnd.nextInt(NUMTILEROWS);
-				auxCol = rnd.nextInt(NUMTILECOLS);
+				auxRow = rnd.nextInt(NumTileRows)*PixelPerTile + (PixelPerTile/2);
+				auxCol = rnd.nextInt(NumTileCols)*PixelPerTile + (PixelPerTile/2);
 				i = 0;
 				while (i < NdxObstacle && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
 					i++;
@@ -71,8 +80,8 @@ public class RouteFinder {
 		/** Create the agent and place it in a random position without obstacle **/
 		existingRobots[NumObstacles] = modelRobots[1];
 		do {
-			auxRow = rnd.nextInt(NUMTILEROWS);
-			auxCol = rnd.nextInt(NUMTILECOLS);
+			auxRow = rnd.nextInt(NumTileRows)*PixelPerTile + (PixelPerTile/2);
+			auxCol = rnd.nextInt(NumTileCols)*PixelPerTile + (PixelPerTile/2);
 			i = 0;
 			while (i < NumObstacles && !(robotSetups[i].getX() == auxRow && robotSetups[i].getY() == auxCol)) {
 				i++;
